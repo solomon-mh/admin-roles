@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Task Adder</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 @endsection
 
@@ -45,6 +46,7 @@
         var events = [];
         var calendar = new FullCalendar.Calendar(calendarEl, {
             selectable: true,
+            editable:true,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
@@ -53,7 +55,6 @@
             initialView: 'dayGridMonth',
             timeZone: 'UTC',
             events: '/events',
-            editable: true,
             dateClick: function(info) {
                 alert('clicked ' + info.dateStr);
                 },
@@ -61,7 +62,8 @@
                 alert('selected ' + info.startStr + ' to ' + info.endStr);
                 },
             // Deleting The Event
-            eventContent: function(info) {
+            eventContent: function(info) {  
+                // console.log(`info is ${info.event.title}`)
                 var eventTitle = info.event.title;
     var eventDesc = info.event.extendedProps.description; // Access description
     var eventElement = document.createElement('div');
@@ -88,12 +90,6 @@
                                 color: #000;
                             ">
                                 ${eventTitle}
-                            </span>
-                            <span style="
-                                color: #555;
-                                font-size: 0.9em;
-                            ">
-                                ${eventDesc ? eventDesc : 'No description'}
                             </span>
                     </div>
                 `;
@@ -127,9 +123,17 @@
                 var eventId = info.event.id;
                 var newStartDate = info.event.start;
                 var newEndDate = info.event.end || newStartDate;
+                if (newEndDate) {
+                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
+                }
+                else{
+                    var newEndDateUTC = null
+                }
                 var newStartDateUTC = newStartDate.toISOString().slice(0, 10);
                 var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-                 alert(eventId,newStartDateUTC,newEndDateUTC,)
+                //  alert(newStartDateUTC)
+                //  alert(`/schedule/${eventId}`)
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}`,
@@ -149,10 +153,20 @@
 
             // Event Resizing
             eventResize: function(info) {
+                // alert('Resize')
                 var eventId = info.event.id;
                 var newEndDate = info.event.end;
-                var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-
+                alert(newEndDate)
+                // Adjust the end date to be the end of the day
+                if (newEndDate) {
+                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
+                }
+                else{
+                    var newEndDateUTC = null
+                }
+                alert(newEndDate)
+                
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}/resize`,

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ScheduleController extends Controller
 {
@@ -46,22 +47,29 @@ class ScheduleController extends Controller
 
    public function update(Request $request, $id)
 {
-    $schedule = Schedule::findOrFail($id);
+    try {
+        $schedule = Schedule::findOrFail($id);
+        
+        // Debugging: Log request data
+        Log::info('Update request data: ', $request->all());
 
-    // Ensure request data is available and correctly parsed
-    $start_date = Carbon::parse($request->input('start_date'))->setTimezone('UTC');
-    $end_date = Carbon::parse($request->input('end_date'))->setTimezone('UTC');
+        // Parse and update dates
+        $start_date = Carbon::parse($request->input('start_date'))->setTimezone('UTC');
+        $end_date = Carbon::parse($request->input('end_date'))->setTimezone('UTC');
 
-    // Debugging: Check if dates are correctly parsed
-    // ::info("Updating event $id: Start date - $start_date, End date - $end_date");
+        $schedule->update([
+            'start' => $start_date,
+            'end' => $end_date,
+        ]);
 
-    $schedule->update([
-        'start' => $start_date,
-        'end' => $end_date,
-    ]);
-
-    return response()->json(['message' => 'Event moved successfully']);
+        return response()->json(['message' => 'Event moved successfully']);
+    } catch (\Exception $e) {
+        // Log error and return response
+        Log::error("Error updating event $id: " . $e->getMessage());
+        return response()->json(['message' => 'Error updating event'], 500);
+    }
 }
+
 
 
     public function resize(Request $request, $id)

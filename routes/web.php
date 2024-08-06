@@ -12,12 +12,14 @@ Route::get('/', [ScheduleController::class, 'index']);
 Route::get('/events', [ScheduleController::class, 'getEvents']);
 Route::get('/schedule/delete/{id}', [ScheduleController::class, 'deleteEvent']);
 Route::post('/schedule/{id}', [ScheduleController::class, 'update']);
+Route::get('schedule/{id}', function($id){
+    return response($id);
+});
 Route::post('/schedule/{id}/resize', [ScheduleController::class, 'resize']);
 Route::get('/events/search', [ScheduleController::class, 'search']);
 
 Route::view('add-schedule', 'schedule.add');
 Route::post('create-schedule', [ScheduleController::class, 'create']);
-Route::post('schedule/{id}', [ScheduleController::class, 'update']);
 // End Full Calender=================================================================
 
 
