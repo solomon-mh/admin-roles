@@ -1,0 +1,230 @@
+// // resources/scss/app.scss
+
+// // Variables
+// $font-stack: "Figtree", sans-serif;
+// $bg-color: #f7fafc; // Light gray background
+// $text-color: #2d3748; // Dark gray text
+// $header-bg-color: #ffffff; // White header background
+// $shadow-color: rgba(0, 0, 0, 0.1); // Light shadow color
+
+// // Mixins
+// @mixin flex-center {
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+// }
+
+// // Base styles
+// body {
+//     font-family: $font-stack;
+//     color: $text-color;
+//     background-color: $bg-color;
+//     margin: 0;
+//     padding: 0;
+// }
+
+// a {
+//     color: inherit;
+//     text-decoration: none;
+//     &:hover {
+//         text-decoration: underline;
+//     }
+// }
+
+// // Utility classes
+// .container {
+//     max-width: 1280px;
+//     margin: 0 auto;
+//     padding: 0 1rem;
+// }
+
+// // Layout
+// .min-h-screen {
+//     min-height: 100vh;
+// }
+
+// .bg-gray-100 {
+//     background-color: $bg-color;
+// }
+
+// .font-sans {
+//     font-family: $font-stack;
+// }
+
+// .antialiased {
+//     -webkit-font-smoothing: antialiased;
+//     -moz-osx-font-smoothing: grayscale;
+// }
+
+// .bg-white {
+//     background-color: $header-bg-color;
+// }
+
+// .shadow {
+//     box-shadow: 0 1px 3px $shadow-color, 0 1px 2px $shadow-color;
+// }
+
+// // Header
+// header {
+//     &.bg-white {
+//         background-color: $header-bg-color;
+//     }
+
+//     .shadow {
+//         box-shadow: 0 1px 3px $shadow-color, 0 1px 2px $shadow-color;
+//     }
+
+//     .container {
+//         padding: 1.5rem 1rem;
+//         @include flex-center;
+//         justify-content: space-between;
+//     }
+
+//     .max-w-7xl {
+//         max-width: 1280px;
+//     }
+
+//     .mx-auto {
+//         margin: 0 auto;
+//     }
+
+//     .py-6 {
+//         padding-top: 1.5rem;
+//         padding-bottom: 1.5rem;
+//     }
+
+//     .px-4 {
+//         padding-left: 1rem;
+//         padding-right: 1rem;
+//     }
+
+//     .sm\:px-6 {
+//         @media (min-width: 640px) {
+//             padding-left: 1.5rem;
+//             padding-right: 1.5rem;
+//         }
+//     }
+
+//     .lg\:px-8 {
+//         @media (min-width: 1024px) {
+//             padding-left: 2rem;
+//             padding-right: 2rem;
+//         }
+//     }
+// }
+
+// // Main content
+// main {
+//     .container {
+//         padding: 2rem 1rem;
+//     }
+// }
+// // resources/scss/app.scss
+
+// // Variables
+// $primary-color: #007bff;
+// $success-color: #28a745;
+// $text-color: #2d3748;
+// $background-color: #f8f9fa; // Bootstrap's light gray background
+// $header-bg-color: #ffffff;
+// $card-bg-color: #ffffff;
+// $border-color: #e0e0e0;
+// $box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+// $font-stack: "Figtree", sans-serif;
+
+// // Mixins
+// @mixin flex-center {
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+// }
+
+// // Base styles
+// body {
+//     font-family: $font-stack;
+//     color: $text-color;
+//     background-color: $background-color;
+//     margin: 0;
+//     padding: 0;
+// }
+
+// a {
+//     color: inherit;
+//     text-decoration: none;
+//     &:hover {
+//         text-decoration: underline;
+//     }
+// }
+
+// // Utility classes
+// .container {
+//     max-width: 1280px;
+//     margin: 0 auto;
+//     padding: 0 1rem;
+// }
+
+// // Layout
+// .mt-5 {
+//     margin-top: 3rem;
+// }
+
+// .input-group {
+//     .form-control {
+//         border-radius: 0.25rem 0 0 0.25rem;
+//     }
+
+//     .input-group-append {
+//         .btn {
+//             border-radius: 0 0.25rem 0.25rem 0;
+//         }
+//     }
+// }
+
+// .btn-group {
+//     .btn {
+//         margin-right: 0.5rem;
+//         &:last-child {
+//             margin-right: 0;
+//         }
+//     }
+// }
+
+// .card {
+//     background-color: $card-bg-color;
+//     border: 1px solid $border-color;
+//     border-radius: 0.25rem;
+//     box-shadow: $box-shadow;
+
+//     .card-body {
+//         padding: 1.5rem;
+//     }
+// }
+
+// #calendar {
+//     width: 100%;
+//     height: 100vh;
+//     margin-top: 1rem;
+//     background-color: #ffffff;
+//     border-radius: 0.25rem;
+//     box-shadow: $box-shadow;
+// }
+
+// .btn-primary {
+//     background-color: $primary-color;
+//     border-color: $primary-color;
+
+//     &:hover {
+//         background-color: darken($primary-color, 10%);
+//         border-color: darken($primary-color, 10%);
+//     }
+// }
+
+// .btn-success {
+//     background-color: $success-color;
+//     border-color: $success-color;
+
+//     &:hover {
+//         background-color: darken($success-color, 10%);
+//         border-color: darken($success-color, 10%);
+//     }
+// }
