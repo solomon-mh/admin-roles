@@ -10,6 +10,11 @@
 @endsection
 
 @section('content')
+    @if (session()->has('delete-msg'))
+        {
+        <p>{{ session('message') }}</p>
+        }
+    @endif
     <div class="container mx-auto mt-5">
         {{-- For Search --}}
         <div class="flex flex-wrap mb-6">
@@ -69,7 +74,7 @@
             events: '/events',
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
-                alert(clickedDate)
+                // alert(clickedDate)
                 $.ajax({
                     url: '/schedule/check',
                     method: 'GET',
@@ -77,11 +82,14 @@
                         date: clickedDate
                     },
                     success: function(response) {
+                        // alert(response.event)
+                        alert(response.hasEvent)
                         if (response.hasEvent) {
-                            // Display the event (you can customize this as needed)
                             alert('Event: ' + response.event.title);
                         } else {
-                            openAddEventModal(dateStr);
+                            // alert('No Event')
+                            // alert()
+                            openAddEventModal(clickedDate);
                         }
                     },
                     error: function(error) {
@@ -191,11 +199,10 @@
                 if (newEndDate) {
                     newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
+                    alert(newEndDateUTC)
                 } else {
                     var newEndDateUTC = null
                 }
-                alert(newEndDate)
-
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}/resize`,
@@ -274,16 +281,14 @@
             downloadLink.click();
         });
 
-        function openAddEventModal(dateStr) {
+        function openAddEventModal(clickedDate) {
             const modal = document.getElementById('scheduleModal');
             const startDateInput = document.getElementById('start');
             const endDateInput = document.getElementById('end');
+            const dateToUse = clickedDate || new Date().toISOString().split('T')[0];
 
-            // Set the date in the modal inputs
-            startDateInput.value = dateStr;
-            endDateInput.value = dateStr;
-
-            // Open the modal
+            startDateInput.value = dateToUse;
+            endDateInput.value = dateToUse;
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
         }
