@@ -68,27 +68,29 @@
             timeZone: 'UTC',
             events: '/events',
             dateClick: function(info) {
-                alert('clicked ' + info.dateStr);
-                var dateStr = info.dateStr;
-                var events = calendar.getEvents();
-                var hasEvent = events.some(event => {
-                    var eventStart = FullCalendar.formatDate(event.start, {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    });
-                    return eventStart === dateStr;
+                var clickedDate = info.dateStr;
+                alert(clickedDate)
+                $.ajax({
+                    url: '/schedule/check',
+                    method: 'GET',
+                    data: {
+                        date: clickedDate
+                    },
+                    success: function(response) {
+                        if (response.hasEvent) {
+                            // Display the event (you can customize this as needed)
+                            alert('Event: ' + response.event.title);
+                        } else {
+                            openAddEventModal(dateStr);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error checking date:', error);
+                    }
                 });
-                alert(hasEvent)
-
-                if (!hasEvent) {
-                    openAddEventModal(dateStr);
-                } else {
-                    alert('There is already an event on ' + dateStr);
-                }
             },
             select: function(info) {
-                alert('selected ' + info.startStr + ' to ' + info.endStr);
+                // alert('selected ' + info.startStr + ' to ' + info.endStr);
             },
             // Deleting The Event
             eventContent: function(info) {
@@ -153,7 +155,7 @@
                 var newStartDate = info.event.start;
                 var newEndDate = info.event.end || newStartDate;
                 if (newEndDate) {
-                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
                 } else {
                     var newEndDateUTC = null
