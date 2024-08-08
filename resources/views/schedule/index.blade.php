@@ -68,13 +68,13 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    {{-- CSRF Token Setup for AJAX --}}
     <script type="text/javascript">
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
 
         var calendarEl = document.getElementById('calendar');
         var events = [];
@@ -90,28 +90,26 @@
             timeZone: 'UTC',
             events: '/events',
             dateClick: function(info) {
-                alert('clicked ' + info.dateStr);
-                var dateStr = info.dateStr;
-                var events = calendar.getEvents();
-                var hasEvent = events.some(event => {
-                    var eventStart = FullCalendar.formatDate(event.start, {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    });
-                    return eventStart === dateStr;
+                var clickedDate = info.dateStr;
+                $.ajax({
+                    url: '/schedule/check',
+                    method: 'GET',
+                    data: {
+                        date: clickedDate
+                    },
+                    success: function(response) {
+                        if (response.hasEvent) {
+                            openEventDetailsModal(response.event);
+                        } else {
+                            openAddEventModal(clickedDate);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error checking date:', error);
+                    }
                 });
-                alert(hasEvent)
-
-                if (!hasEvent) {
-                    openAddEventModal(dateStr);
-                } else {
-                    alert('There is already an event on ' + dateStr);
-                }
             },
-            select: function(info) {
-                alert('selected ' + info.startStr + ' to ' + info.endStr);
-            },
+            select: function(info) {},
             // Deleting The Event
             eventContent: function(info) {
                 // console.log(`info is ${info.event.title}`)
@@ -155,7 +153,6 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                alert('Event deleted successfully.');
                                 calendar.refetchEvents(); // Refresh events after deletion
                             },
                             error: function(error) {
@@ -175,18 +172,19 @@
                 var newStartDate = info.event.start;
                 var newEndDate = info.event.end || newStartDate;
                 if (newEndDate) {
-                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
                 } else {
                     var newEndDateUTC = null
                 }
                 var newStartDateUTC = newStartDate.toISOString().slice(0, 10);
                 var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-                //  alert(newStartDateUTC)
-                //  alert(`/schedule/${eventId}`)
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}`,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: {
                         '_token': "{{ csrf_token() }}",
                         start_date: newStartDateUTC,
@@ -203,19 +201,15 @@
 
             // Event Resizing
             eventResize: function(info) {
-                // alert('Resize')
                 var eventId = info.event.id;
                 var newEndDate = info.event.end;
-                alert(newEndDate)
                 // Adjust the end date to be the end of the day
                 if (newEndDate) {
-                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
                 } else {
                     var newEndDateUTC = null
                 }
-                alert(newEndDate)
-
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}/resize`,
@@ -241,7 +235,7 @@
             var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
             filterAndDisplayEvents(searchKeywords);
         });
-        document.getElementById('searchInput').addEventListener('keydown', function() {
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
             if (event.key == 'Enter') {
                 var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
                 filterAndDisplayEvents(searchKeywords);
@@ -294,18 +288,59 @@
             downloadLink.click();
         });
 
-        function openAddEventModal(dateStr) {
+        function openAddEventModal(clickedDate) {
             const modal = document.getElementById('scheduleModal');
             const startDateInput = document.getElementById('start');
             const endDateInput = document.getElementById('end');
+            const dateToUse = clickedDate || new Date().toISOString().split('T')[0];
 
-            // Set the date in the modal inputs
-            startDateInput.value = dateStr;
-            endDateInput.value = dateStr;
-
-            // Open the modal
+            startDateInput.value = dateToUse;
+            endDateInput.value = dateToUse;
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
         }
+
+        function openEventDetailsModal(eventData) {
+            const eventEndDateStr = eventData.end;
+            const eventEndDate = new Date(eventEndDateStr);
+            eventEndDate.setDate(eventEndDate.getDate());
+            const formattedEndDate = eventEndDate.toISOString().split('T')[0];
+            // Set event details in the modal
+            document.getElementById('singleEventTitle').textContent = `Title: ${eventData.title}`;
+            document.getElementById('eventStartDate').textContent = `Start Date: ${eventData.start}`;
+            document.getElementById('eventEndDate').textContent = `End Date: ${formattedEndDate}`;
+            document.getElementById('eventDescription').textContent =
+                `${eventData.description ? 'Description :' : ''}  ${eventData.description || ""}`
+
+            // Open the modal
+            const modal = document.getElementById('eventModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+            document.getElementById('eventModalContent').style.backgroundColor = eventData.color;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const closeAddModalBtn = document.getElementById('closeAddModalBtn');
+            const eventModal = document.getElementById('eventModal');
+
+            // Function to close the modal
+            function closeModal() {
+                eventModal.classList.remove('opacity-100', 'pointer-events-auto');
+                eventModal.classList.add('opacity-0', 'pointer-events-none');
+                scheduleModal.classList.remove('opacity-100', 'pointer-events-auto');
+                scheduleModal.classList.add('opacity-0', 'pointer-events-none');
+            }
+
+            // Close modal on button click
+            closeModalBtn.addEventListener('click', closeModal);
+            closeAddModalBtn.addEventListener('click', closeModal);
+
+            // Close modal when clicking outside of the modal content
+            eventModal.addEventListener('click', (e) => {
+                if (e.target === eventModal) {
+                    closeModal();
+                }
+            });
+        });
     </script>
 @endsection
