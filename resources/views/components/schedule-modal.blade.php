@@ -2,8 +2,9 @@
 <div id="scheduleModal"
     class="fixed inset-0 z-50 flex items-center justify-center bg-gray-500 bg-opacity-75 transition-opacity opacity-0 pointer-events-none">
     <div
+     id="scheduleModalContent"
         class="bg-white rounded-lg shadow-md max-w-lg w-full mx-4 p-6 max-h-[80vh] flex flex-col relative overflow-y-auto">
-        <button id="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+        <button id="closeAddModalBtn" class="absolute top-3 right-3 text-red-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

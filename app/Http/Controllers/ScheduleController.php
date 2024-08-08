@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Schedule;
-use App\Http\Requests\StoreScheduleRequest;
-use App\Http\Requests\UpdateScheduleRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -37,6 +35,11 @@ class ScheduleController extends Controller
         return response()->json($schedules);
     }
 
+    public function getEvent($date){
+        $schedule = Schedule::findOrFail($date);
+        return response()->json($schedule);
+    }
+
     public function deleteEvent($id)
     {
         $schedule = Schedule::findOrFail($id);
@@ -51,7 +54,7 @@ class ScheduleController extends Controller
         $schedule = Schedule::findOrFail($id);
         
         // Debugging: Log request data
-        Log::info('Update request data: ', $request->all());
+        // Log::info('Update request data: ', $request->all());
 
         // Parse and update dates
         $start_date = Carbon::parse($request->input('start_date'))->setTimezone('UTC');
@@ -61,7 +64,6 @@ class ScheduleController extends Controller
             'start' => $start_date,
             'end' => $end_date,
         ]);
-
         return response()->json(['message' => 'Event moved successfully']);
     } catch (\Exception $e) {
         // Log error and return response
@@ -72,15 +74,16 @@ class ScheduleController extends Controller
 
 
 
-    public function resize(Request $request, $id)
-    {
-        $schedule = Schedule::findOrFail($id);
+   public function resize(Request $request, $id)
+{
+    $schedule = Schedule::findOrFail($id);
 
-        $newEndDate = Carbon::parse($request->input('end_date'))->setTimezone('UTC');
-        $schedule->update(['end' => $newEndDate]);
+    $newEndDate = Carbon::parse($request->input('end_date'))->setTimezone('UTC');
+    $schedule->update(['end' => $newEndDate]);
 
-        return response()->json(['message' => 'Event resized successfully.']);
-    }
+    return response()->json(['message' => 'Event resized successfully.']);
+}
+
 
     public function search(Request $request)
     {
@@ -90,4 +93,21 @@ class ScheduleController extends Controller
 
         return response()->json($matchingEvents);
     }
+    public function checkDate(Request $request)
+{
+    $date = $request->input('date');
+    $event = Schedule::whereDate('start', $date)->orWhereDate('end', $date)->first();
+
+    if ($event) {
+        return response()->json([
+            'hasEvent' => true,
+            'event' => $event
+        ]);
+    } else {
+        return response()->json([
+            'hasEvent' => false,
+            'event'=>null,
+        ]);
+    }
+}
 }
