@@ -1,9 +1,3 @@
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
         var calendarEl = document.getElementById('calendar');
         var events = [];
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -19,7 +13,6 @@
             events: '/events',
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
-                // alert(clickedDate)
                 $.ajax({
                     url: '/schedule/check',
                     method: 'GET',
@@ -39,7 +32,6 @@
                 });
             },
             select: function(info) {
-                // alert('selected ' + info.startStr + ' to ' + info.endStr);
             },
             // Deleting The Event
             eventContent: function(info) {
@@ -84,7 +76,6 @@
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                alert('Event deleted successfully.');
                                 calendar.refetchEvents(); // Refresh events after deletion
                             },
                             error: function(error) {
@@ -111,8 +102,6 @@
                 }
                 var newStartDateUTC = newStartDate.toISOString().slice(0, 10);
                 var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-                //  alert(newStartDateUTC)
-                //  alert(`/schedule/${eventId}`)
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}`,
@@ -132,15 +121,12 @@
 
             // Event Resizing
             eventResize: function(info) {
-                // alert('Resize')
                 var eventId = info.event.id;
                 var newEndDate = info.event.end;
-                alert(newEndDate)
                 // Adjust the end date to be the end of the day
                 if (newEndDate) {
                     newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-                    alert(newEndDateUTC)
                 } else {
                     var newEndDateUTC = null
                 }
@@ -169,8 +155,8 @@
             var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
             filterAndDisplayEvents(searchKeywords);
         });
-        document.getElementById('searchInput').addEventListener('keydown', function() {
-            if (event.key == 'Enter') {
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
+            if (event.code == 'Enter') {
                 var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
                 filterAndDisplayEvents(searchKeywords);
             }
@@ -237,7 +223,7 @@
         function openEventDetailsModal(eventData) {
             const eventEndDateStr = eventData.end;
             const eventEndDate = new Date(eventEndDateStr);
-            eventEndDate.setDate(eventEndDate.getDate() - 1);
+            eventEndDate.setDate(eventEndDate.getDate());
             const formattedEndDate = eventEndDate.toISOString().split('T')[0];
             // Set event details in the modal
             document.getElementById('singleEventTitle').textContent = `Title: ${eventData.title}`;
@@ -275,6 +261,9 @@
                     closeModal();
                 }
             });
-
-
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         });

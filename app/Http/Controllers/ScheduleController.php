@@ -89,9 +89,9 @@ class ScheduleController extends Controller
     {
         $searchKeywords = $request->input('title');
 
-        $matchingEvents = Schedule::where('title', 'like', '%' . $searchKeywords . '%')->get();
+        $matchingEvents = Schedule::where('title', 'like', `%` . $searchKeywords . '%')->get();
 
-        return response()->json($matchingEvents);
+        return response()->json(`matchingEvents`. $matchingEvents);
     }
     public function checkDate(Request $request)
 {
