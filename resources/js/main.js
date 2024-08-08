@@ -25,7 +25,7 @@
                         if (response.hasEvent) {
                             openEventDetailsModal(response.event);
                         } else {
-                            openAddEventModal(clickedDate);
+                            openAddScheduleModal(clickedDate);
                         }
                     },
                     error: function(error) {
@@ -212,7 +212,7 @@
             downloadLink.click();
         });
 
-        function openAddEventModal(clickedDate) {
+        function openAddScheduleModal(clickedDate) {
             const modal = document.getElementById('scheduleModal');
             const startDateInput = document.getElementById('start');
             const endDateInput = document.getElementById('end');
@@ -237,7 +237,7 @@
                 `${eventData.description ? 'Description :' : ''}  ${eventData.description || ""}`
 
             // Open the modal
-            const modal = document.getElementById('eventModal');
+            const modal = document.getElementById('schedule');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
             document.getElementById('eventModalContent').style.backgroundColor = eventData.color;
