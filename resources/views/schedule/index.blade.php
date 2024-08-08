@@ -236,7 +236,7 @@
             filterAndDisplayEvents(searchKeywords);
         });
         document.getElementById('searchInput').addEventListener('keydown', function(event) {
-            if (event.key == 'Enter') {
+            if (event.code == 'Enter') {
                 var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
                 filterAndDisplayEvents(searchKeywords);
             }
