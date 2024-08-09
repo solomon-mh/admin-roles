@@ -1,5 +1,3 @@
-
-
         var calendarEl = document.getElementById('calendar');
         var events = [];
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -33,7 +31,8 @@
                     }
                 });
             },
-            select: function(info) {},
+            select: function(info) {
+            },
             // Deleting The Event
             eventContent: function(info) {
                 // console.log(`info is ${info.event.title}`)
@@ -106,9 +105,6 @@
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}`,
-                     headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                             },
                     data: {
                         '_token': "{{ csrf_token() }}",
                         start_date: newStartDateUTC,
@@ -265,4 +261,9 @@
                     closeModal();
                 }
             });
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         });
