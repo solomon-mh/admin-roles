@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Task Adder</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 @endsection
 
@@ -20,7 +19,7 @@
                         placeholder="Search events">
 
                     <button id="searchButton"
-                        class="btn btn btn bg-lime-300 px-3 py-2 rounded-lg rounded-l-none hover:bg-lime-500 btn-success">{{ __('Search') }}</button>
+                        class="btn btn bg-lime-300 px-3 py-2 rounded-lg rounded-l-none hover:bg-lime-500 btn-success">{{ __('Search') }}</button>
                 </div>
             </div>
             <div class="w-full md:w-1/2 flex justify-end space-x-2">
@@ -30,9 +29,11 @@
                     class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
                     {{ __('Add Schedule') }}
                 </button>
+                <button onclick="openAddTaskModal()"
+                    class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
+                    {{ __('Add Event') }}
+                </button>
 
-                <a href="{{ URL('add-schedule') }}"
-                    class="btn btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">{{ __('Add Task') }}</a>
             </div>
         </div>
         <div class="bg-white shadow-md rounded-lg p-4">
@@ -49,28 +50,27 @@
                         </path>
                     </svg>
                 </button>
-                <h2 id="singleScheduleTitle" class="text-xl font-semibold mb-4">Schudule Title</h2>
-                <p id="scheduleStartDate" class="text-gray-700">Schedule Date</p>
-                <p id="scheduleEndDate" class="text-gray-700">Schedule Date</p>
+                <h2 id="singleScheduleTitle" class="text-xl font-semibold mb-4">Schedule Title</h2>
+                <p id="scheduleStartDate" class="text-gray-700">Start Date</p>
+                <p id="scheduleEndDate" class="text-gray-700">End Date</p>
                 <p id="scheduleDescription" class="text-gray-600">Schedule Description</p>
             </div>
         </div>
     </div>
     {{-- Schedule Modal --}}
     <x-schedule-modal />
+    <x-add-event-modal />
 
-
-    {{-- <script src="../../js/schedule-modal.js"></script> --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    {{-- CSRF Token Setup for AJAX --}}
     <script type="text/javascript">
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
 
         var calendarEl = document.getElementById('calendar');
         var events = [];
@@ -79,38 +79,36 @@
             editable: true,
             headerToolbar: {
                 left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                right: 'title',
+                // right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             initialView: 'dayGridMonth',
             timeZone: 'UTC',
             events: '/events',
             dateClick: function(info) {
-                alert('clicked ' + info.dateStr);
-                var dateStr = info.dateStr;
-                var events = calendar.getEvents();
-                var hasEvent = events.some(event => {
-                    var eventStart = FullCalendar.formatDate(event.start, {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                    });
-                    return eventStart === dateStr;
+                var clickedDate = info.dateStr;
+                $.ajax({
+                    url: '/schedule/check',
+                    method: 'GET',
+                    data: {
+                        date: clickedDate
+                    },
+                    success: function(response) {
+                        if (response.hasEvent) {
+                            openScheduleDetailsModal(response.event);
+                        } else {
+                            openAddScheduleModal(clickedDate);
+                        }
+                    },
+                    error: function(error) {
+                        console.error('Error checking date:', error);
+                    }
                 });
-                alert(hasEvent)
-
-                if (!hasEvent) {
-                    openAddEventModal(dateStr);
-                } else {
-                    alert('There is already an event on ' + dateStr);
-                }
             },
-            select: function(info) {
-                alert('selected ' + info.startStr + ' to ' + info.endStr);
-            },
+            select: function(info) {},
             // Deleting The Event
             eventContent: function(info) {
-                // console.log(`info is ${info.event.title}`)
+                // console.log(info is ${info.event.title})
                 var eventTitle = info.event.title;
                 var eventDesc = info.event.extendedProps.description; // Access description
                 var eventElement = document.createElement('div');
@@ -118,41 +116,37 @@
                 eventElement.innerHTML = `
                     <div style="
                         display: flex;
-                        align-items:center;
-                        gap:3px;
+                        align-items: center;
+                        gap: 3px;
                         font-weight: bold;
                     ">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span id="deleteBtn" style="
-                            cursor: pointer;
-                            font-weight: bold;
-                            border-radius: 4px;
-                            margin-right: 8px;
-                        ">
-                            ❌
-                        </span> 
-                    </div>
-                            <span style="
+                        <div style="display: flex; justify-content: space-between;">
+                            <span id="deleteBtn" style="
+                                cursor: pointer;
                                 font-weight: bold;
-                                color: #000;
-                            ">
-                                ${eventTitle}
-                            </span>
-                    </div>
-                `;
-
+                                border-radius: 4px;
+                                margin-right: 8px;
+                            ">❌</span>
+                        </div>
+                        <span style="
+                            font-weight: bold;
+                            color: #000;
+                        ">
+                            ${eventTitle}
+                        </span>
+                    </div>`;
                 eventElement.querySelector('#deleteBtn').addEventListener('click', function() {
                     var eventId = info.event.id;
+                    alert(eventId)
                     if (confirm("Are you sure you want to delete this event? " + eventId)) {
                         $.ajax({
                             method: 'get',
-                            url: '/schedule/delete/' + eventId,
+                            url: `/schedule/delete/${eventId}`,
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                             },
                             success: function(response) {
-                                alert('Event deleted successfully.');
-                                calendar.refetchEvents(); // Refresh events after deletion
+                                calendar.refetchEvents();
                             },
                             error: function(error) {
                                 console.error('Error deleting event:', error);
@@ -171,18 +165,19 @@
                 var newStartDate = info.event.start;
                 var newEndDate = info.event.end || newStartDate;
                 if (newEndDate) {
-                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
                 } else {
                     var newEndDateUTC = null
                 }
                 var newStartDateUTC = newStartDate.toISOString().slice(0, 10);
                 var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
-                //  alert(newStartDateUTC)
-                //  alert(`/schedule/${eventId}`)
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}`,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: {
                         '_token': "{{ csrf_token() }}",
                         start_date: newStartDateUTC,
@@ -199,19 +194,15 @@
 
             // Event Resizing
             eventResize: function(info) {
-                // alert('Resize')
                 var eventId = info.event.id;
                 var newEndDate = info.event.end;
-                alert(newEndDate)
                 // Adjust the end date to be the end of the day
                 if (newEndDate) {
-                    newEndDate.setUTCDate(newEndDate.getUTCDate() - 1);
+                    newEndDate.setUTCDate(newEndDate.getUTCDate());
                     var newEndDateUTC = newEndDate.toISOString().slice(0, 10);
                 } else {
                     var newEndDateUTC = null
                 }
-                alert(newEndDate)
-
                 $.ajax({
                     method: 'post',
                     url: `/schedule/${eventId}/resize`,
@@ -237,8 +228,8 @@
             var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
             filterAndDisplayEvents(searchKeywords);
         });
-        document.getElementById('searchInput').addEventListener('keydown', function() {
-            if (event.key == 'Enter') {
+        document.getElementById('searchInput').addEventListener('keydown', function(event) {
+            if (event.code == 'Enter') {
                 var searchKeywords = document.getElementById('searchInput').value.toLowerCase();
                 filterAndDisplayEvents(searchKeywords);
             }
@@ -257,7 +248,6 @@
                 }
             });
         }
-
         // Exporting Function
         document.getElementById('exportButton').addEventListener('click', function() {
             var events = calendar.getEvents().map(function(event) {
@@ -270,11 +260,8 @@
             });
 
             var wb = XLSX.utils.book_new();
-
             var ws = XLSX.utils.json_to_sheet(events);
-
             XLSX.utils.book_append_sheet(wb, ws, 'Events');
-
             var arrayBuffer = XLSX.write(wb, {
                 bookType: 'xlsx',
                 type: 'array'
@@ -290,7 +277,7 @@
             downloadLink.click();
         });
 
-        function openAddEventModal(dateStr) {
+        function openAddScheduleModal(clickedDate) {
             const modal = document.getElementById('scheduleModal');
             const startDateInput = document.getElementById('start');
             const endDateInput = document.getElementById('end');
@@ -302,45 +289,42 @@
             modal.classList.add('opacity-100', 'pointer-events-auto');
         }
 
-        function openEventDetailsModal(eventData) {
-            const eventEndDateStr = eventData.end;
-            const eventEndDate = new Date(eventEndDateStr);
+        function openScheduleDetailsModal(eventData) {
+            const eventEndDate = new Date(eventData.end);
             eventEndDate.setDate(eventEndDate.getDate());
             const formattedEndDate = eventEndDate.toISOString().split('T')[0];
+
             // Set event details in the modal
-            document.getElementById('singleEventTitle').textContent = `Title: ${eventData.title}`;
-            document.getElementById('eventStartDate').textContent = `Start Date: ${eventData.start}`;
-            document.getElementById('eventEndDate').textContent = `End Date: ${formattedEndDate}`;
-            document.getElementById('eventDescription').textContent =
-                `${eventData.description ? 'Description :' : ''}  ${eventData.description || ""}`
+            document.getElementById('singleScheduleTitle').textContent = `Title: ${eventData.title}`;
+            document.getElementById('scheduleStartDate').textContent = `Start Date: ${eventData.start}`;
+            document.getElementById('scheduleEndDate').textContent = `End Date: ${formattedEndDate}`;
+            document.getElementById('scheduleDescription').textContent =
+                `${eventData.description ? 'Description :' : ''}${eventData.description || ""}`
 
             // Open the modal
-            const modal = document.getElementById('eventModal');
+            const modal = document.getElementById('scheduleDetailModal');
             modal.classList.remove('opacity-0', 'pointer-events-none');
             modal.classList.add('opacity-100', 'pointer-events-auto');
-            document.getElementById('eventModalContent').style.backgroundColor = eventData.color;
+            document.getElementById('scheduleDetailModalContent').style.backgroundColor = eventData.color;
         }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('opacity-100', 'pointer-events-auto');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const closeModalBtn = document.getElementById('closeModalBtn');
-            const closeAddModalBtn = document.getElementById('closeAddModalBtn');
-            const eventModal = document.getElementById('eventModal');
+            const closeAddScheduleBtn = document.getElementById('closeAddScheduleBtn');
+            const scheduleDetailModal = document.getElementById('scheduleDetailModal');
 
-            // Function to close the modal
-            function closeModal() {
-                eventModal.classList.remove('opacity-100', 'pointer-events-auto');
-                eventModal.classList.add('opacity-0', 'pointer-events-none');
-                scheduleModal.classList.remove('opacity-100', 'pointer-events-auto');
-                scheduleModal.classList.add('opacity-0', 'pointer-events-none');
-            }
+            closeModalBtn.addEventListener('click', () => closeModal('scheduleDetailModal'));
+            closeAddScheduleBtn.addEventListener('click', () => closeModal('scheduleModal'));
 
-            // Close modal on button click
-            closeModalBtn.addEventListener('click', closeModal);
-            closeAddModalBtn.addEventListener('click', closeModal);
-
-            // Close modal when clicking outside of the modal content
-            eventModal.addEventListener('click', (e) => {
-                if (e.target === eventModal) {
-                    closeModal();
+            scheduleDetailModal.addEventListener('click', (e) => {
+                if (e.target === scheduleDetailModal) {
+                    closeModal('scheduleDetailModal');
                 }
             });
         });

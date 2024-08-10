@@ -1,5 +1,3 @@
-
-
         var calendarEl = document.getElementById('calendar');
         var events = [];
         var calendar = new FullCalendar.Calendar(calendarEl, {
