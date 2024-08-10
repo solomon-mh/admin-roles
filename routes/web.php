@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ScheduleController::class, 'index'])->middleware('auth');
 Route::get('/schedules', [ScheduleController::class, 'getSchedules']);
 Route::get('/schedule/{id}', [ScheduleController::class, 'getSchedule']);
-// Route::get('/schedule/check', [ScheduleController::class, 'checkDate']);
-Route::get('/schedule/check', function () {
-    return 'Route is working';
-});
+Route::get('/schedules/check', [ScheduleController::class, 'checkDate']);
+// Route::get('/schedules/check', function () {
+//     return 'Route is working';
+// });
 
 Route::get('/schedule/delete/{id}', [ScheduleController::class, 'deleteSchedule']);
 Route::post('/schedule/{id}', [ScheduleController::class, 'update']);

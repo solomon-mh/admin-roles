@@ -29,8 +29,8 @@
                     class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
                     {{ __('Add Schedule') }}
                 </button>
-                <button onclick="openAddTaskModal()"
-                    class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
+                {{-- onclick="openAddTaskModal()" --}}
+                <button class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
                     {{ __('Add Event') }}
                 </button>
 
@@ -88,8 +88,8 @@
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
                 $.ajax({
-                    url: '/schedule/check',
-                    method: 'GET',
+                    url: '/schedules/check',
+                    method: 'get',
                     data: {
                         date: clickedDate
                     },
