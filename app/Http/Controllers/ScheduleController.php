@@ -29,23 +29,23 @@ class ScheduleController extends Controller
     }
 
 
-    public function getEvents()
+    public function getSchedules()
     {
         $schedules = Schedule::all();
         return response()->json($schedules);
     }
 
-    public function getEvent($date){
+    public function getSchedule($date){
         $schedule = Schedule::findOrFail($date);
         return response()->json($schedule);
     }
 
-    public function deleteEvent($id)
+    public function deleteSchedule($id)
     {
         $schedule = Schedule::findOrFail($id);
         $schedule->delete();
 
-        return response()->json(['message' => 'Event deleted successfully']);
+        return response()->json(['message' => 'Schedule deleted successfully']);
     }
 
    public function update(Request $request, $id)
@@ -91,7 +91,6 @@ class ScheduleController extends Controller
     $matchingEvents = Schedule::where('title', 'like', '%' . $searchKeywords . '%')->get();
     return response()->json($matchingEvents);
 }
-
     public function checkDate(Request $request)
 {
     $date = $request->input('date');

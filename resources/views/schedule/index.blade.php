@@ -59,7 +59,7 @@
     </div>
     {{-- Schedule Modal --}}
     <x-schedule-modal />
-    <x-add-event-modal />
+    {{-- <x-add-event-modal /> --}}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
@@ -84,7 +84,7 @@
             },
             initialView: 'dayGridMonth',
             timeZone: 'UTC',
-            events: '/events',
+            events: '/schedules',
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
                 $.ajax({
@@ -238,7 +238,7 @@
         function filterAndDisplayEvents(searchKeywords) {
             $.ajax({
                 method: 'GET',
-                url: `/events/search?title=${searchKeywords}`,
+                url: `/schedules/search?title=${searchKeywords}`,
                 success: function(response) {
                     calendar.removeAllEvents();
                     calendar.addEventSource(response);

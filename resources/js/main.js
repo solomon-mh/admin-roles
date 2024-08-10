@@ -10,7 +10,7 @@
             },
             initialView: 'dayGridMonth',
             timeZone: 'UTC',
-            events: '/events',
+            events: '/schedules',
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
                 $.ajax({
@@ -165,7 +165,7 @@
         function filterAndDisplayEvents(searchKeywords) {
             $.ajax({
                 method: 'GET',
-                url: `/events/search?title=${searchKeywords}`,
+                url: `/schedules/search?title=${searchKeywords}`,
                 success: function(response) {
                     calendar.removeAllEvents();
                     calendar.addEventSource(response);
