@@ -94,8 +94,9 @@ class ScheduleController extends Controller
     public function checkDate(Request $request)
 {
     $date = $request->input('date');
-    $event = Schedule::whereDate('start', $date)->orWhereDate('end', $date)->first();
-
+    // $event = Schedule::whereDate('start', $date)->orWhereDate('end', $date)->first();
+    $event = Schedule::whereDate('start', $date)->first(); 
+    
     if ($event) {
         return response()->json([
             'hasEvent' => true,
