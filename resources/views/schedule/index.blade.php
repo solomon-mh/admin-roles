@@ -29,7 +29,8 @@
                     class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
                     {{ __('Add Schedule') }}
                 </button>
-                <button onclick="openAddTaskModal()"
+
+                <button onclick="openAddEventModal()"
                     class="btn bg-lime-300 px-3 py-2 rounded-lg hover:bg-lime-500 btn-success">
                     {{ __('Add Event') }}
                 </button>
@@ -59,7 +60,7 @@
     </div>
     {{-- Schedule Modal --}}
     <x-schedule-modal />
-    {{-- <x-add-event-modal /> --}}
+    <x-add-event-modal />
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
@@ -70,11 +71,9 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
-
         var calendarEl = document.getElementById('calendar');
         var events = [];
-        var calendar = new FullCalendar.Calendar(calendarEl, {
+        window.calendar = new FullCalendar.Calendar(calendarEl, {
             selectable: true,
             editable: true,
             headerToolbar: {
@@ -88,8 +87,8 @@
             dateClick: function(info) {
                 var clickedDate = info.dateStr;
                 $.ajax({
-                    url: '/schedule/check',
-                    method: 'GET',
+                    url: '/schedules/check',
+                    method: 'get',
                     data: {
                         date: clickedDate
                     },
@@ -116,9 +115,11 @@
                 eventElement.innerHTML = `
                     <div style="
                         display: flex;
+                        flex-wrap:wrap;
                         align-items: center;
-                        gap: 3px;
+                        gap: 1px;
                         font-weight: bold;
+                        backgorund-color:red;
                     ">
                         <div style="display: flex; justify-content: space-between;">
                             <span id="deleteBtn" style="
@@ -127,18 +128,18 @@
                                 border-radius: 4px;
                                 margin-right: 8px;
                             ">❌</span>
-                        </div>
-                        <span style="
+                            <span style="
                             font-weight: bold;
-                            color: #000;
-                        ">
+                            color: #000; // make the color to fit based on the bg-color?
+                            ">
                             ${eventTitle}
-                        </span>
+                            </span>
+                            </div>
                     </div>`;
                 eventElement.querySelector('#deleteBtn').addEventListener('click', function() {
                     var eventId = info.event.id;
-                    alert(eventId)
-                    if (confirm("Are you sure you want to delete this event? " + eventId)) {
+                    // alert(eventId)
+                    if (confirm("Are you sure you want to delete this event? ")) {
                         $.ajax({
                             method: 'get',
                             url: `/schedule/delete/${eventId}`,
@@ -250,7 +251,7 @@
         }
         // Exporting Function
         document.getElementById('exportButton').addEventListener('click', function() {
-            var events = calendar.getEvents().map(function(event) {
+            var events = calendar.getSchedules().map(function(event) {
                 return {
                     title: event.title,
                     start: event.start ? event.start.toISOString() : null,
@@ -327,6 +328,43 @@
                     closeModal('scheduleDetailModal');
                 }
             });
+            // Handle the form submission in the Add Event modal
+            // document.getElementById('addEventForm').addEventListener('submit', function(e) {
+            //     e.preventDefault();
+
+            //     var formData = new FormData(this);
+            //     var eventTitle = formData.get('title');
+            //     var eventDescription = formData.get('description');
+            //     var eventDate = formData.get('event_date');
+
+            //     $.ajax({
+            //         method: 'POST',
+            //         url: '/events/add',
+            //         data: {
+            //             title: eventTitle,
+            //             description: eventDescription,
+            //             event_date: eventDate,
+            //         },
+            //         success: function(response) {
+            //             // Add the new event to the calendar
+            //             calendar.addEvent({
+            //                 id: response.id,
+            //                 title: response.title,
+            //                 start: response.event_date,
+            //                 end: response.event_date,
+            //                 description: response.description,
+            //                 color: response.color // Optional: Set color if available
+            //             });
+            //             alert(response.title)
+
+            //             // Close the modal
+            //             closeModal('addEventModal');
+            //         },
+            //         error: function(error) {
+            //             console.error('Error adding event:', error);
+            //         }
+            //     });
+            // });
         });
     </script>
 @endsection
